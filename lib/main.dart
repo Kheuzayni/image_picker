@@ -4,23 +4,26 @@ void main() {
   runApp(const MyApp());
 }
 
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
+
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.deepOrange,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Apprendre le image picker'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
 
   @override
@@ -28,13 +31,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-     _counter++;
-    });
-  }
+  ImagePicker imagePicker = ImagePicker();
+  File? file;
 
   @override
   Widget build(BuildContext context) {
@@ -43,24 +42,41 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-       child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            Expanded(
+                child: (file != null)
+                    ? Image.file(file!)
+                    : const Center(child: Text("Prenez une photo"))
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                    onPressed: (() => useCamera(ImageSource.gallery)),
+                    child: const Icon(Icons.photo_library_outlined)),
+                ElevatedButton(onPressed: (() => useCamera(ImageSource.camera)),
+                    child: const Icon(Icons.camera_alt))
+              ],
+            )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+  Future useCamera(ImageSource source) async {
+    XFile? xFile = await imagePicker.pickImage(source: source);
+    if (xFile != null) {
+      setState(() {
+        file = File(xFile!.path);
+      });
+    }
+  }
 }
+
